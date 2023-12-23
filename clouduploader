@@ -1,5 +1,6 @@
 #!/bin/bash 
 
+#azure setup
 setup() { 
     # Install az cli
     #curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
@@ -10,23 +11,27 @@ setup() {
 
 FILEPATH=$1
 
+#declaration of azure storage names
 declaration() {
     read -p "Account Name: " accName
     read -p "Container Name: " conName
 }
 
+#check errors during upload
 check_error() {
     if [ $? -ne 0 ]; then
-    echo "Error: The command failed."
+        echo "Error: The command failed."
     else
         echo "Success: The command succeeded."
     fi
 }
 
+#lists blobs in container
 blob_list(){
     az storage blob list --account-name $accName --container-name $conName --output tsv --auth-mode login --query "[].name"
 }
 
+#upload files to container 
 upload() {
     if [ -f $FILEPATH ]; then
         echo "Uploading $FILEPATH"
@@ -37,6 +42,7 @@ upload() {
     fi
 }
 
+#checks if file is already in container
 check_storage() { 
     for FILE in $(blob_list); do
         if [ "$FILE" != "$FILEPATH" ]; then
