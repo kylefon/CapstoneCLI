@@ -12,15 +12,16 @@ setup() {
 FILEPATH=$1
 
 #declaration of azure storage names
-declaration() {
+start() {
     read -p "Account Name: " accName
     read -p "Container Name: " conName
+    check_storage
 }
 
 #check errors during upload
 check_error() {
     if [ $? -ne 0 ]; then
-        echo "Error: The command failed."
+    echo "Error: The command failed."
     else
         echo "Success: The command succeeded."
     fi
@@ -44,14 +45,20 @@ upload() {
 
 #checks if file is already in container
 check_storage() { 
+    file_exist=false
+
     for FILE in $(blob_list); do
-        if [ "$FILE" != "$FILEPATH" ]; then
-            echo "$FILEPATH does not exist" 
-            upload 
+        if [ "$FILE" == "$FILEPATH" ]; then
+            file_exist=true
+            break
         fi
-        echo "File exists"
-        break
     done
+
+    if [ $file_exist == true ]; then
+        echo "$FILEPATH already exists"
+    else
+        upload
+    fi
 }
 
-check_storage
+start
