@@ -1,0 +1,51 @@
+#!/bin/bash 
+
+setup() { 
+    # Install az cli
+    #curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+    # Login
+    az login --use-device-code
+    echo "You're logged in."
+}
+
+FILEPATH=$1
+
+declaration() {
+    read -p "Account Name: " accName
+    read -p "Container Name: " conName
+}
+
+check_error() {
+    if [ $? -ne 0 ]; then
+    echo "Error: The command failed."
+    else
+        echo "Success: The command succeeded."
+    fi
+}
+
+blob_list(){
+    az storage blob list --account-name $accName --container-name $conName --output tsv --auth-mode login --query "[].name"
+}
+
+upload() {
+    if [ -f $FILEPATH ]; then
+        echo "Uploading $FILEPATH"
+        az storage blob upload --account-name $accName --container-name $conName --name "$(basename "$FILEPATH")" --type block --file "$FILEPATH" --auth-mode login
+        check_error
+    else
+        echo "$FILEPATH does not exist"
+    fi
+}
+
+check_storage() { 
+    for FILE in $(blob_list); do
+        if [ "$FILE" != "$FILEPATH" ]; then
+            echo "$FILEPATH does not exist" 
+            upload 
+        fi
+        echo "File exists"
+        break
+    done
+}
+
+check_storage
