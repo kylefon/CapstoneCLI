@@ -1,22 +1,26 @@
 #!/bin/bash 
 
-#azure setup
-setup() { 
-    # Install az cli
-    #curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-    # Login
-    az login --use-device-code
-    echo "You're logged in."
-}
-
-FILEPATH=$1
-
-#declaration of azure storage names
-start() {
-    read -p "Account Name: " accName
-    read -p "Container Name: " conName
-    check_storage
-}
+while getopts "a:c:f:" option; do
+    case $option in
+    a)
+        accName="$OPTARG"
+        ;;
+    c)
+        conName="$OPTARG"
+        ;;
+    f)
+        FILEPATH="$OPTARG"
+        ;;
+    \?)
+        echo "Invalid option: -$OPTARG" >&2
+        exit 1
+        ;;
+    :)
+        echo "Option -$OPTARG requires an argument." >&2
+        exit 1
+        ;;
+    esac
+done 
 
 #check errors during upload
 check_error() {
@@ -36,7 +40,7 @@ blob_list(){
 upload() {
     if [ -f $FILEPATH ]; then
         echo "Uploading $FILEPATH"
-        az storage blob upload --account-name $accName --container-name $conName --name "$(basename "$FILEPATH")" --type block --file "$FILEPATH" --auth-mode login
+        pv $FILEPATH | az storage blob upload --account-name $accName --container-name $conName --name "$(basename "$FILEPATH")" --type block --file "$FILEPATH" --auth-mode login 2>/dev/null
         check_error
     else
         echo "$FILEPATH does not exist"
@@ -61,4 +65,4 @@ check_storage() {
     fi
 }
 
-start
+check_storage
