@@ -18,7 +18,6 @@ blob_list(){
 
 #upload files to container 
 upload() {
-    local $FILEPATH
     if [ -f $FILEPATH ]; then
         echo "Uploading $FILEPATH..."
         pv $FILEPATH | az storage blob upload --account-name $accName --container-name $conName --name "$(basename "$FILEPATH")" --type block --file "$FILEPATH" --auth-mode login 2>/dev/null
