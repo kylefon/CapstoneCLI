@@ -27,6 +27,10 @@ chmod +x login.sh
 ./login.sh
 ```
 5. Input Account Name and Container Name in config.sh
+```
+export accName="YOUR ACCOUNT NAME"
+export conName="YOUR CONTAINER NAME"
+```
 
 ## Usage
 Follow the syntax below to upload a file to Azure:
