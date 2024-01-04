@@ -1,26 +1,6 @@
 #!/bin/bash 
 
-while getopts "a:c:f:" option; do
-    case $option in
-    a)
-        accName="$OPTARG"
-        ;;
-    c)
-        conName="$OPTARG"
-        ;;
-    f)
-        FILEPATH="$OPTARG"
-        ;;
-    \?)
-        echo "Invalid option: -$OPTARG" >&2
-        exit 1
-        ;;
-    :)
-        echo "Option -$OPTARG requires an argument." >&2
-        exit 1
-        ;;
-    esac
-done 
+source config.sh
 
 #check errors during upload
 check_error() {
@@ -38,8 +18,9 @@ blob_list(){
 
 #upload files to container 
 upload() {
+    local $FILEPATH
     if [ -f $FILEPATH ]; then
-        echo "Uploading $FILEPATH"
+        echo "Uploading $FILEPATH..."
         pv $FILEPATH | az storage blob upload --account-name $accName --container-name $conName --name "$(basename "$FILEPATH")" --type block --file "$FILEPATH" --auth-mode login 2>/dev/null
         check_error
     else
@@ -48,21 +29,22 @@ upload() {
 }
 
 #checks if file is already in container
-check_storage() { 
-    file_exist=false
+check_storage() {
+    for FILEPATH in "$@"; do 
+        file_exist=false
+        for FILE in $(blob_list); do
+            if [ "$FILE" == "$FILEPATH" ]; then
+                file_exist=true
+                break
+            fi
+        done
 
-    for FILE in $(blob_list); do
-        if [ "$FILE" == "$FILEPATH" ]; then
-            file_exist=true
-            break
+        if [ $file_exist == true ]; then
+            echo "$FILEPATH already exists"
+        else
+            upload "$FILEPATH"
         fi
-    done
-
-    if [ $file_exist == true ]; then
-        echo "$FILEPATH already exists"
-    else
-        upload
-    fi
+    done 
 }
 
-check_storage
+check_storage "$@"
