@@ -1,5 +1,5 @@
 #Azure Storage account name
-export accName="bashscript123"
+export accName="YOUR ACCOUNT NAME"
 
 #Azure Storage container name
-export conName="test"
+export conName="YOUR CONTAINER NAME"
